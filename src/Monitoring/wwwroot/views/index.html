@@ -1,0 +1,43 @@
+﻿
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SignalR MoveShape Demo</title>
+    <style>
+        #shape {
+            width: 100px;
+            height: 100px;
+            background-color: #FF0000;
+        }
+    </style>
+</head>
+<body>
+    <script src="../lib/jquery/dist/jquery.js"></script>
+    <script src="../lib/jquery-ui/jquery-ui.js"></script>
+    <script src="../lib/jquery.signalr.js"></script>
+    <script src="/signalr/hubs"></script>
+    <script>
+        $(function () {
+            var drawGraph = function (data) {
+                $shape.text = "";
+                var text = "";
+                for (var i = 0; i < data.cores.length; ++i) {
+                    text += data.cores[i].load + ", ";
+                }
+                $shape[0].innerHTML = text;
+            }
+            var cpuTickerHub = $.connection.cpuTickerHub,
+                   $shape = $("#graph");
+            cpuTickerHub.client.updateData = function (data) {
+                cpuData = data;
+                drawGraph(cpuData);
+            };
+            $.connection.hub.start({ transport: ['webSockets', 'longPolling'] }).done(function () {
+                cpuTickerHub.server.getCpuData();
+            });
+        });
+    </script>
+
+    <div id="graph" />
+</body>
+</html>
